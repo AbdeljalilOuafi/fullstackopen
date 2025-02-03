@@ -1,37 +1,60 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Search from './components/Search'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import personService from './services/persons'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newPhoneNumber, setPhoneNumber] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [searchResult, setSearchResult] = useState([])
 
+  useEffect(() => {
+    personService.getAll()
+      .then((notes) => {
+        setPersons(notes)
+      })
+      .catch((err) => {
+        alert(`Error fetching data from server: ${err}`)
+      })
+  })
+
   const addPerson = (event) => {
     event.preventDefault()
+
     const newPerson = {
       name: newName,
       number: newPhoneNumber,
-      id: persons.length + 1
     }
 
-    if (persons.find((person) => person.name == newPerson.name)) {
-      alert(`${newName} is already added to phonebook`)
-    } else if (persons.find((person) => person.number == newPhoneNumber)) {
-      alert(`${newPhoneNumber} already exists`)
-    } else {
-    setPersons(persons.concat(newPerson))
+    const existingPerson = persons.find((person) => person.name === newPerson.name)
+    if (existingPerson) {
+      if (existingPerson.number === newPerson.number) {
+        alert(`${newName} is already added to phonebook`);
+        return;
+      }
+    
+      if (window.confirm(`${existingPerson.name} is already added to phonebook, replace the old number with a new one?`)) {
+            personService.updatePerson(existingPerson.id, newPerson)
+              .then((updatedPerson) => {
+                setPersons(persons.filter((person) => person.id === existingPerson.id ? updatedPerson : person))
+              })
+              .catch(err => alert(`Update failed: ${err}`));
+          }
+      return;
+    }
+
+    personService.createPerson(newPerson)
+      .then((note) => {
+        setPersons(persons.concat(note))
+      })
+      .catch((err) => {
+        alert(`Error creating person on the server: ${err}`)
+      })
     setNewName('')
     setPhoneNumber('')
-    }
   }
 
   const filterData = (event) => {
@@ -42,6 +65,7 @@ const App = () => {
     )
     setSearchResult(result)
   }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -57,9 +81,10 @@ const App = () => {
 
       <h3>Numbers</h3>
 
-      <Persons persons={persons}/>
+      <Persons persons={persons} setPersons={setPersons}/>
     </div>
   )
 }
-
 export default App
+
+
