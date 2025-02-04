@@ -3,7 +3,7 @@ import DeleteButton from './DeleteButton'
 
 
 
-const Persons = ({persons, setPersons}) => {
+const Persons = ({persons, setPersons, setMessage}) => {
 
     const handleDelete = (id, name) => {
         const result = window.confirm(`Delete ${name} ?`)
@@ -12,6 +12,9 @@ const Persons = ({persons, setPersons}) => {
             .then(() => {
                 setPersons(persons.filter((person) => person.id !== id))
             })
+            .catch(() => {
+                setMessage({content: `Information of ${name} has already been removed from server`, type: 'error'})
+            })
         }
     }
     return (
@@ -19,7 +22,7 @@ const Persons = ({persons, setPersons}) => {
             {persons.map((person) => {
                 return (
                 <div key={person.id}>{person.name} {person.number}
-                <DeleteButton onClick={() => {handleDelete(person.id, person.name, setPersons)}} text='Delete'/>
+                <DeleteButton onClick={() => {handleDelete(person.id, person.name)}} text='Delete'/>
                 </div>
                 );
             }

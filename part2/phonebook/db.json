@@ -1,9 +1,3 @@
 {
-  "persons": [
-    {
-      "name": "Abdeljalil Ouafi",
-      "number": "new number",
-      "id": "d070"
-    }
-  ]
+  "persons": []
 }

@@ -3,6 +3,7 @@ import Search from './components/Search'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -10,6 +11,7 @@ const App = () => {
   const [newPhoneNumber, setPhoneNumber] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [searchResult, setSearchResult] = useState([])
+  const [Message, setMessage] = useState(null)
 
   useEffect(() => {
     personService.getAll()
@@ -40,6 +42,10 @@ const App = () => {
             personService.updatePerson(existingPerson.id, newPerson)
               .then((updatedPerson) => {
                 setPersons(persons.filter((person) => person.id === existingPerson.id ? updatedPerson : person))
+                setMessage({content: `Updated ${updatedPerson.name}`, type: 'success'})
+                setTimeout(() => {
+                  setMessage(null)
+                }, 5000)
               })
               .catch(err => alert(`Update failed: ${err}`));
           }
@@ -55,6 +61,10 @@ const App = () => {
       })
     setNewName('')
     setPhoneNumber('')
+    setMessage({content: `Added ${newPerson.name}`, type: 'success'})
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000)
   }
 
   const filterData = (event) => {
@@ -69,7 +79,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-
+      <Notification message={Message}/>
       <Search onChange={filterData} searchInput={searchInput} searchResult={searchResult}/>
 
       <h2>Add a new</h2>
@@ -81,7 +91,7 @@ const App = () => {
 
       <h3>Numbers</h3>
 
-      <Persons persons={persons} setPersons={setPersons}/>
+      <Persons persons={persons} setPersons={setPersons} setMessage={setMessage}/>
     </div>
   )
 }
