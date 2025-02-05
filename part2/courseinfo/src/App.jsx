@@ -1,5 +1,6 @@
 import Course from './components/Course'
 
+
 const App = () => {
   const courses = [
     {
@@ -47,10 +48,13 @@ const App = () => {
   ]
 
 
+
   return ( 
         <>
-        <Course course={courses[0]}/>
-        <Course course={courses[1]}/>
+        {
+          courses.map((course) => 
+          <Course key={course.id} course={course}/>)
+        }
         </>
       )
 }
